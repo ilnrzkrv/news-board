@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лента новостей</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">Лента Новостей</div>
+            <div class="header-actions">
+                <button id="theme-toggle" class="btn btn-secondary">🌓 Сменить тему</button>
+                <!-- После входа в аккаунт скрывает её через display = 'none' -->
+                <button id="open-auth-btn" class="btn btn-primary">Войти</button>
+                <!-- Показывается после входа. При клике на неё открывается нужное окно профиля -->
+                <button id="open-user-profile-btn" class="avatar-btn" style="display: none;">😀</button>
+                <!-- Показывается после входа. При клике на неё открывается нужное окно профиля -->
+                <button id="open-moder-profile-btn" class="avatar-btn" style="display: none;">🛡️</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <section class="create-post-section">
+            <!-- Проверить статус авторизации. Если не авторизован, открыть #auth-modal, иначе открыть #suggest-modal -->
+            <button id="open-suggest-btn" class="btn btn-primary btn-large">Предложить новость / объявление</button>
+        </section>
+        <section class="news-feed" id="news-container">
+            <h2>Последние публикации</h2>
+            
+            <!-- Скрыть через display = 'none', когда с бэкенда подгрузятся реальные новости -->
+            <p id="no-news-message" class="no-news-text">На данный момент публикаций нет. Будьте первым, кто предложит новость!</p>
+
+            <!-- Сюда будут динамически вставлять карточки одобренных новостей -->
+        </section>
+    </main>
+
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-window">
+            <button class="modal-close" id="close-auth-btn">&times;</button>
+            <div class="tabs">
+                <button class="tab-btn active" id="tab-login">Вход</button>
+                <button class="tab-btn" id="tab-register">Регистрация</button>
+            </div>
+
+            <!-- ФОРМА ВХОДА -->
+            <form id="login-form" class="modal-form">
+                <div class="input-group">
+                    <label for="login-email">Email (Корпоративная почта)</label>
+                    <input type="email" id="login-email" maxlength="50" required placeholder="example@uunit.ru">
+                    <div class="counter-wrapper"><span class="char-counter" id="login-email-count">0 / 50</span></div>
+                </div>
+                <div class="input-group">
+                    <label for="login-password">Пароль</label>
+                    <input type="password" id="login-password" maxlength="32" required placeholder="Введите пароль">
+                    <div class="counter-wrapper"><span class="char-counter" id="login-pass-count">0 / 32</span></div>
+                </div>
+                <button type="submit" class="btn btn-primary type-submit">Войти</button>
+            </form>
+
+            <!-- ФОРМА РЕГИСТРАЦИИ -->
+            <form id="register-form" class="modal-form style-hidden">
+                <div class="input-group">
+                    <label for="reg-firstname">Имя</label>
+                    <input type="text" id="reg-firstname" maxlength="30" required placeholder="Иван">
+                    <div class="counter-wrapper"><span class="char-counter" id="reg-fname-count">0 / 30</span></div>
+                </div>
+                <div class="input-group">
+                    <label for="reg-lastname">Фамилия</label>
+                    <input type="text" id="reg-lastname" maxlength="30" required placeholder="Иванов">
+                    <div class="counter-wrapper"><span class="char-counter" id="reg-lname-count">0 / 30</span></div>
+                </div>
+                <div class="input-group">
+                    <label for="reg-email">Email</label>
+                    <input type="email" id="reg-email" maxlength="50" required placeholder="student@uunit.ru">
+                    <div class="counter-wrapper"><span class="char-counter" id="reg-email-count">0 / 50</span></div>
+                </div>
+                <div class="input-group">
+                    <label for="reg-password">Пароль</label>
+                    <input type="password" id="reg-password" maxlength="32" required placeholder="Придумайте пароль">
+                    <div class="counter-wrapper"><span class="char-counter" id="reg-pass-count">0 / 32</span></div>
+                </div>
+                <button type="submit" class="btn btn-primary type-submit">Зарегистрироваться</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="suggest-modal" class="modal-overlay">
+        <div class="modal-window">
+            <button class="modal-close" id="close-suggest-btn">&times;</button>
+            <h3>Предложить новость</h3>
+            <form id="suggest-form" class="modal-form">
+                <div class="input-group">
+                    <label for="news-title">Заголовок новости</label>
+                    <input type="text" id="news-title" required placeholder="Введите краткий заголовок">
+                </div>
+                <div class="input-group">
+                    <label for="news-media">Прикрепить изображение / медиа (Макс. 5 МБ)</label>
+                    <input type="file" id="news-media" accept="image/*,video/*">
+                </div>
+                <div class="input-group">
+                    <label for="news-text">Текст публикации</label>
+                    <textarea id="news-text" rows="6" maxlength="2000" required placeholder="Напишите текст..."></textarea>
+                    <div class="counter-wrapper"><span class="char-counter" id="news-text-count">0 / 2000</span></div>
+                </div>
+                <button type="submit" class="btn btn-primary type-submit">Отправить на модерацию</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Открывается при клике на #open-user-profile-btn, если роль пользователя — Пользователь -->
+    <div id="user-modal" class="modal-overlay">
+        <div class="modal-window">
+            <button class="modal-close" id="close-user-btn">&times;</button>
+            <div class="profile-header">
+                <div class="avatar-circle">😀</div>
+                <h3>Личный кабинет</h3>
+            </div>
+            <div class="profile-info-block">
+                <div><span class="info-label">ФИО:</span> <span class="info-value">Загрузка...</span></div>
+                <div><span class="info-label">Логин:</span> <span class="info-value">Загрузка...</span></div>
+                <div><span class="info-label">Роль:</span> <span class="info-value text-purple">Пользователь</span></div>
+            </div>
+            <!-- При клике сбросить сессию авторизации и вернуть кнопку "Войти" в шапку -->
+            <button class="btn btn-secondary w-100" id="logout-user-btn">Выйти из аккаунта</button>
+        </div>
+    </div>
+
+    <!-- Открывается при клике на #open-moder-profile-btn, если роль пользователя — Модератор -->
+    <div id="moderator-modal" class="modal-overlay">
+        <div class="modal-window">
+            <button class="modal-close" id="close-moder-btn">&times;</button>
+            <div class="profile-header">
+                <div class="avatar-circle">🛡️</div>
+                <h3>Личный кабинет модератора</h3>
+            </div>
+            <div class="profile-info-block">
+                <div><span class="info-label">ФИО:</span> <span class="info-value">Загрузка...</span></div>
+                <div><span class="info-label">Логин:</span> <span class="info-value">Загрузка...</span></div>
+                <div><span class="info-label">Роль:</span> <span class="info-value text-purple">Модератор ленты</span></div>
+            </div>
+            <!-- При клике открывать отдельное окно со списком заявок #requests-list-modal -->
+            <button class="btn btn-primary w-100" id="open-requests-btn" style="margin-bottom: 12px;">🔍 Просмотреть заявки</button>
+            <button class="btn btn-secondary w-100" id="logout-moder-btn">Выйти из аккаунта</button>
+        </div>
+    </div>
+
+    <div id="requests-list-modal" class="modal-overlay">
+        <div class="modal-window modal-large-window">
+            <button class="modal-close" id="close-requests-list-btn">&times;</button>
+            <h3 style="margin-bottom: 15px; text-align: center;">Заявки на модерацию</h3>
+            
+            <!-- Контейнер для заявок. Изначально пустой. Будет наполнять его шаблоном -->
+            <div class="moder-requests-list" id="moder-requests-container"></div>
+                <p id="no-requests-message" class="no-requests-text">На данный момент новых заявок</p>
+            </div>
+        </div>
+    </div>
+    <!-- Подключение скрипта архитектуры умной ленты -->
+    <script src="script.js"></script>
+</body>
+</html>

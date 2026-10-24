@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directus API Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-200 font-sans p-6 min-h-screen">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Шапка -->
+        <div class="flex justify-between items-center mb-8 border-b border-gray-700 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-white">Directus API Dashboard</h1>
+                <p class="text-sm text-gray-400">Тестовый дашборд</p>
+            </div>
+            <div id="authStatus" class="px-4 py-2 rounded-full bg-gray-800 text-sm flex items-center gap-2">
+                <div id="statusDot" class="w-2 h-2 rounded-full bg-red-500"></div>
+                <span id="statusText">Не авторизован</span>
+                <button id="logoutBtn" class="ml-2 text-red-400 hover:text-red-300 hidden" onclick="logout()">Выйти</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Левая колонка: Формы -->
+            <div class="space-y-6">
+                <!-- Регистрация -->
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h2 class="text-xl font-semibold mb-4 text-white flex items-center gap-2">
+                        <span class="text-blue-400">👤</span> Регистрация (Вебхук)
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-1">Имя</label>
+                                <input type="text" id="regFirst" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-1">Фамилия</label>
+                                <input type="text" id="regLast" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">E-mail</label>
+                            <input type="email" id="regEmail" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Пароль</label>
+                            <input type="password" id="regPass" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white">
+                        </div>
+                        <button onclick="register()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded transition-colors">
+                            Зарегистрироваться
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Авторизация -->
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h2 class="text-xl font-semibold mb-4 text-white flex items-center gap-2">
+                        <span class="text-green-400">🔑</span> Авторизация
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">E-mail</label>
+                            <input type="email" id="loginEmail" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Пароль</label>
+                            <input type="password" id="loginPass" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white">
+                        </div>
+                        <button onclick="login()" class="w-full bg-green-600 hover:bg-green-500 text-white font-medium py-2 px-4 rounded transition-colors">
+                            Войти и получить токен
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Предложить новость -->
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h2 class="text-xl font-semibold mb-4 text-white flex items-center gap-2">
+                        <span class="text-purple-400">📝</span> Предложить новость
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Заголовок</label>
+                            <input type="text" id="newsTitle" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Содержание</label>
+                            <textarea id="newsContent" rows="3" class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Прикрепить файл</label>
+                            <input type="file" id="newsFile" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-700 file:text-white hover:file:bg-gray-600">
+                        </div>
+                        <button onclick="submitNews()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-medium py-2 px-4 rounded transition-colors">
+                            Отправить на модерацию
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Центральная колонка: Все новости -->
+            <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 flex flex-col h-[850px]">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-white flex items-center gap-2">
+                        <span class="text-gray-400">📄</span> Все новости
+                    </h2>
+                    <button onclick="loadNews()" class="bg-gray-700 hover:bg-gray-600 text-white text-sm py-1 px-3 rounded">
+                        Обновить
+                    </button>
+                </div>
+                <div id="newsContainer" class="flex-1 overflow-y-auto space-y-4 pr-2">
+                    <p class="text-gray-500 text-center mt-10">Нажми "Обновить" для загрузки</p>
+                </div>
+            </div>
+
+            <!-- Правая колонка: Опубликованные -->
+            <div class="bg-gray-800 p-6 rounded-lg border border-green-900/50 flex flex-col h-[850px]">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-white flex items-center gap-2">
+                        <span class="text-green-400">✅</span> Лента (Approved)
+                    </h2>
+                    <button onclick="loadNews()" class="bg-green-700 hover:bg-green-600 text-white text-sm py-1 px-3 rounded">
+                        Обновить
+                    </button>
+                </div>
+                <div id="approvedNewsContainer" class="flex-1 overflow-y-auto space-y-4 pr-2">
+                    <p class="text-gray-500 text-center mt-10">Нажми "Обновить" для загрузки</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fixed bottom-5 right-5 space-y-2 z-50"></div>
+
+    <script>
+        const BASE_URL = 'https://uunit.fun'; 
+        let token = localStorage.getItem('directus_token') || null;
+        let userId = localStorage.getItem('directus_user_id') || null;
+
+        window.onload = () => {
+            updateAuthUI();
+            if (token) loadNews();
+        };
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded shadow-lg text-white text-sm transition-opacity duration-300 flex items-start gap-2 ${type === 'error' ? 'bg-red-900 border border-red-700' : 'bg-gray-800 border border-gray-700'}`;
+            toast.innerHTML = `<span class="mt-0.5">${type === 'error' ? '❌' : '✅'}</span> <span>${message}</span>`;
+            document.getElementById('toastContainer').appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        function updateAuthUI() {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (token) {
+                dot.className = 'w-2 h-2 rounded-full bg-green-500';
+                text.textContent = 'Авторизован';
+                logoutBtn.classList.remove('hidden');
+            } else {
+                dot.className = 'w-2 h-2 rounded-full bg-red-500';
+                text.textContent = 'Не авторизован';
+                logoutBtn.classList.add('hidden');
+            }
+        }
+
+        function logout() {
+            token = null;
+            userId = null;
+            localStorage.removeItem('directus_token');
+            localStorage.removeItem('directus_user_id');
+            updateAuthUI();
+            document.getElementById('newsContainer').innerHTML = '<p class="text-gray-500 text-center mt-10">Авторизуйтесь для просмотра</p>';
+            document.getElementById('approvedNewsContainer').innerHTML = '<p class="text-gray-500 text-center mt-10">Авторизуйтесь для просмотра</p>';
+            showToast('Вы вышли из системы');
+        }
+
+        async function register() {
+            const first_name = document.getElementById('regFirst').value;
+            const last_name = document.getElementById('regLast').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPass').value;
+
+            try {
+                const res = await fetch(`${BASE_URL}/flows/trigger/41da044f-c8a6-4e83-9f0b-a3b9403fe956`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ first_name, last_name, email, password })
+                });
+                if (!res.ok) throw new Error('Ошибка регистрации. Проверьте вебхук.');
+                showToast('Регистрация успешна! Теперь авторизуйтесь.');
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPass').value;
+
+            try {
+                const res = await fetch(`${BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                
+                if (data.errors) throw new Error(data.errors[0].message);
+                
+                token = data.data.access_token;
+                localStorage.setItem('directus_token', token);
+
+                const meRes = await fetch(`${BASE_URL}/users/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const meData = await meRes.json();
+                userId = meData.data.id;
+                localStorage.setItem('directus_user_id', userId);
+
+                updateAuthUI();
+                showToast('Успешная авторизация');
+                loadNews();
+            } catch (err) {
+                showToast(`Ошибка входа: ${err.message}`, 'error');
+            }
+        }
+
+        async function submitNews() {
+            if (!token) return showToast('Сначала авторизуйтесь!', 'error');
+
+            const title = document.getElementById('newsTitle').value;
+            const content = document.getElementById('newsContent').value;
+            const fileInput = document.getElementById('newsFile');
+            let fileId = null;
+
+            try {
+                if (fileInput.files.length > 0) {
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    const uploadRes = await fetch(`${BASE_URL}/files`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: formData
+                    });
+                    const uploadData = await uploadRes.json();
+                    if (uploadData.errors) throw new Error(uploadData.errors[0].message);
+                    fileId = uploadData.data.id;
+                    showToast('Файл загружен');
+                }
+
+                const payload = { title, content, media: fileId };
+                if (userId) payload.author = userId;
+
+                const newsRes = await fetch(`${BASE_URL}/items/News`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const newsData = await newsRes.json();
+                if (newsData.errors) throw new Error(newsData.errors[0].message);
+                
+                showToast('Новость отправлена на модерацию!');
+                document.getElementById('newsTitle').value = '';
+                document.getElementById('newsContent').value = '';
+                fileInput.value = '';
+                loadNews();
+            } catch (err) {
+                showToast(`Ошибка: ${err.message}`, 'error');
+            }
+        }
+
+        async function loadNews() {
+            if (!token) return;
+            const containerAll = document.getElementById('newsContainer');
+            const containerApproved = document.getElementById('approvedNewsContainer');
+            
+            containerAll.innerHTML = '<p class="text-gray-500 text-center mt-5">Загрузка...</p>';
+            containerApproved.innerHTML = '<p class="text-gray-500 text-center mt-5">Загрузка...</p>';
+
+            try {
+                // Запрос всех новостей
+                const resAll = await fetch(`${BASE_URL}/items/News?sort=-date_created`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const dataAll = await resAll.json();
+                
+                // Запрос только одобренных новостей (фильтр Directus)
+                const resApproved = await fetch(`${BASE_URL}/items/News?filter[status][_eq]=approved&sort=-date_created`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const dataApproved = await resApproved.json();
+                
+                if (dataAll.errors) throw new Error(dataAll.errors[0].message);
+                if (dataApproved.errors) throw new Error(dataApproved.errors[0].message);
+
+                renderFeed(dataAll.data, containerAll);
+                renderFeed(dataApproved.data, containerApproved);
+
+            } catch (err) {
+                containerAll.innerHTML = `<p class="text-red-400 text-center mt-5">Ошибка загрузки</p>`;
+                containerApproved.innerHTML = `<p class="text-red-400 text-center mt-5">Ошибка загрузки</p>`;
+                showToast(err.message, 'error');
+            }
+        }
+
+        function renderFeed(newsArray, container) {
+            if (newsArray.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center mt-5">Новостей пока нет</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            newsArray.forEach(news => {
+                let displayDate = 'Только что';
+                if (news.date_created) {
+                    const d = new Date(news.date_created);
+                    if (!isNaN(d.getTime())) {
+                        displayDate = d.toLocaleString('ru-RU', {
+                            day: '2-digit', month: '2-digit', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit'
+                        });
+                    }
+                }
+
+                const authorId = news.author ? String(news.author).substring(0,8) + '...' : 'Аноним';
+                const statusColor = news.status === 'approved' ? 'text-green-400' : 'text-yellow-400';
+                
+                // Вывод картинки напрямую с сервера Directus
+                const mediaHtml = news.media 
+                    ? `<img src="${BASE_URL}/assets/${news.media}" class="mt-3 rounded-lg w-full max-h-64 object-cover border border-gray-700" alt="Прикрепленный файл">` 
+                    : '';
+
+                const card = document.createElement('div');
+                card.className = 'bg-gray-900 p-4 rounded border border-gray-700';
+                card.innerHTML = `
+                    <h3 class="text-lg font-bold text-white mb-1">${news.title || 'Без заголовка'}</h3>
+                    <div class="text-xs text-gray-400 mb-3 pb-2 border-b border-gray-800">
+                        Автор: <span class="font-mono">${authorId}</span> | 
+                        Статус: <span class="${statusColor}">${news.status || 'unknown'}</span> | 
+                        🕒 ${displayDate}
+                    </div>
+                    <p class="text-gray-300 text-sm whitespace-pre-wrap">${news.content || ''}</p>
+                    ${mediaHtml}
+                `;
+                container.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
